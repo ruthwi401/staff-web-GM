@@ -1,0 +1,751 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#123c2b">
+<title>Green Mart V4 — Operations Centre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+ --forest:#123c2b;--forest2:#1c5a3e;--green:#238653;--mint:#e7f5eb;
+ --bg:#f5f7f4;--white:#fff;--ink:#18271e;--muted:#7d8980;
+ --line:#e7ece7;--orange:#b8781d;--orangebg:#fff4df;
+ --blue:#4776c7;--bluebg:#edf3ff;--red:#c94e4e;--redbg:#ffeded;
+ --purple:#8661ba;--purplebg:#f2edfb;--shadow:0 8px 30px rgba(25,55,37,.045);
+ --radius:17px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px "DM Sans",sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #a6d8b5;outline-offset:2px}
+button:disabled{opacity:.5;cursor:not-allowed}
+.sidebar{position:fixed;inset:0 auto 0 0;width:254px;background:var(--forest);color:#fff;padding:25px 17px;display:flex;flex-direction:column;z-index:50;transition:transform .25s}
+.brand{display:flex;align-items:center;gap:11px;padding:0 8px 27px}
+.brand-icon{width:43px;height:43px;border-radius:14px;background:#dff4e5;color:var(--forest);display:grid;place-items:center;font-size:24px}
+.brand-title{font:800 17px Manrope,sans-serif;letter-spacing:-.5px}
+.brand-sub{font-size:10px;color:#b6d5c1;letter-spacing:1.4px;margin-top:4px}
+.nav-caption{font-size:10px;letter-spacing:1.7px;color:#86ad94;font-weight:700;padding:15px 12px 9px}
+.nav{display:grid;gap:5px}
+.nav button{border:0;background:transparent;color:#c5d9cb;border-radius:11px;padding:12px;display:flex;align-items:center;gap:12px;text-align:left;width:100%;font-size:12px;font-weight:600;transition:.18s}
+.nav button:hover{background:#ffffff10;color:white}
+.nav button.active{background:#ffffff17;color:white;box-shadow:inset 3px 0 #8fe0a8}
+.nav-icon{font-size:17px;width:21px;text-align:center}
+.nav-badge{margin-left:auto;border-radius:7px;background:#ffffff19;padding:4px 7px;font-size:10px}
+.sidebar-bottom{margin-top:auto}
+.connection-card{padding:14px;border-radius:13px;background:#ffffff0c;border:1px solid #ffffff18}
+.connection-title{font-size:11px;font-weight:700}
+.connection-desc{font-size:10px;line-height:1.6;color:#bad0c1;margin-top:6px}
+.connection-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#86e3a1;margin-right:6px}
+.main{margin-left:254px;min-height:100vh}
+.topbar{height:75px;background:#ffffffed;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 32px;gap:16px;position:sticky;top:0;z-index:30;backdrop-filter:blur(16px)}
+.top-left{display:flex;align-items:center;gap:12px;min-width:0}
+.breadcrumb{font-size:10px;color:var(--muted);margin-bottom:4px}
+.top-title{font:800 17px Manrope,sans-serif;letter-spacing:-.4px}
+.top-right{display:flex;align-items:center;gap:11px}
+.search{position:relative}
+.search input{width:225px;border:1px solid var(--line);background:#f8faf7;border-radius:10px;padding:10px 12px 10px 34px;font-size:11px}
+.search-icon{position:absolute;left:12px;top:9px;color:var(--muted);font-size:16px}
+.icon-btn{width:37px;height:37px;border:1px solid var(--line);background:white;border-radius:10px;display:grid;place-items:center;color:#536157;font-size:16px;position:relative}
+.icon-btn:hover{background:var(--mint)}
+.alert-dot{position:absolute;right:7px;top:7px;background:#e86c57;border:2px solid white;width:8px;height:8px;border-radius:50%}
+.profile{display:flex;align-items:center;gap:9px;border-left:1px solid var(--line);padding-left:14px}
+.avatar{height:36px;width:36px;border-radius:12px;background:#e1f1e5;color:var(--forest);font-size:11px;font-weight:800;display:grid;place-items:center}
+.profile-name{font-size:11px;font-weight:800}
+.profile-role{font-size:10px;color:var(--muted);margin-top:4px}
+.menu-btn{display:none}
+.content{max-width:1600px;margin:auto;padding:29px 32px 35px}
+.page{display:none;animation:appear .2s ease}
+.page.active{display:block}
+@keyframes appear{from{opacity:.55;transform:translateY(4px)}to{opacity:1;transform:none}}
+.welcome{background:linear-gradient(115deg,#123c2b,#1d6443 68%,#26774c);border-radius:20px;padding:26px 28px;color:white;display:flex;align-items:center;justify-content:space-between;gap:18px;position:relative;overflow:hidden;margin-bottom:21px}
+.welcome:after{content:"";position:absolute;right:100px;top:-110px;width:260px;height:260px;border:1px solid #ffffff15;border-radius:50%;box-shadow:0 0 0 35px #ffffff07,0 0 0 70px #ffffff05;pointer-events:none}
+.welcome-copy{position:relative;z-index:1}
+.welcome-label{font-size:10px;letter-spacing:1.8px;color:#b5e6c5;font-weight:700;margin-bottom:10px}
+.welcome h1{font:800 clamp(22px,2.3vw,30px) Manrope,sans-serif;letter-spacing:-1.1px;margin:0 0 8px}
+.welcome p{font-size:12px;color:#d4e8d9;margin:0;line-height:1.6}
+.welcome-side{position:relative;z-index:1;text-align:right;min-width:130px}
+.date-label{font-size:10px;color:#c0dfca;margin-bottom:7px}
+.date-value{font:700 14px Manrope,sans-serif}
+.store-open{display:inline-flex;align-items:center;gap:7px;border:1px solid #ffffff32;background:#ffffff12;border-radius:9px;padding:9px 11px;font-size:10px;margin-top:13px}
+.store-open span{width:6px;height:6px;border-radius:50%;background:#8fe2a8}
+.section-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:24px 0 14px}
+.section-heading h2{font:800 15px Manrope,sans-serif;letter-spacing:-.3px;margin:0}
+.section-heading p{font-size:11px;color:var(--muted);margin:5px 0 0}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.stat{background:white;border:1px solid var(--line);border-radius:15px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.stat-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.stat-label{font-size:11px;color:var(--muted);font-weight:600}
+.stat-icon{width:37px;height:37px;border-radius:12px;display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.stat-value{font:800 28px Manrope,sans-serif;letter-spacing:-1px;margin:15px 0 6px}
+.stat-foot{font-size:10px;color:var(--muted);line-height:1.5}
+.stat-foot strong{color:var(--green)}
+.layout-two{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(270px,.85fr);gap:17px;margin-top:17px}
+.layout-equal{display:grid;grid-template-columns:1fr 1fr;gap:17px;margin-top:17px}
+.panel{background:white;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);min-width:0;overflow:hidden}
+.panel-head{padding:19px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line)}
+.panel-title{font:800 13px Manrope,sans-serif;margin:0}
+.panel-sub{font-size:10px;color:var(--muted);margin-top:5px}
+.link-btn{border:0;background:transparent;color:var(--green);font-size:11px;font-weight:800;padding:7px}
+.link-btn:hover{text-decoration:underline}
+.pipeline{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;padding:17px 20px;border-bottom:1px solid var(--line)}
+.pipeline-step{background:#f7f9f6;border-radius:10px;padding:11px 9px;min-width:0}
+.pipeline-step span{display:block;font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pipeline-step strong{display:block;font:800 20px Manrope,sans-serif;margin-top:5px}
+.pipeline-step.active-step{background:var(--mint)}
+.pipeline-step.active-step span{color:var(--green)}
+.order-list{padding:0 20px}
+.order-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 0;border-bottom:1px solid #edf1ed}
+.order-row:last-child{border-bottom:0}
+.order-main{min-width:0}
+.order-id{font-size:11px;font-weight:800}
+.order-customer{font-size:11px;color:var(--muted);margin-top:5px}
+.order-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:8px}
+.order-right{text-align:right;flex-shrink:0}
+.order-total{font-size:12px;font-weight:800}
+.order-actions{display:flex;justify-content:flex-end;gap:5px;margin-top:8px}
+.badge{display:inline-flex;align-items:center;gap:5px;border-radius:7px;padding:6px 8px;font-size:9px;font-weight:800;white-space:nowrap;background:#f0f3f0;color:#66746a}
+.badge:before{content:"";width:5px;height:5px;background:currentColor;border-radius:50%}
+.badge.pending{color:var(--orange);background:var(--orangebg)}
+.badge.preparing{color:var(--blue);background:var(--bluebg)}
+.badge.packed{color:var(--purple);background:var(--purplebg)}
+.badge.ready{color:var(--green);background:var(--mint)}
+.badge.delivered{color:#5d7162;background:#edf2ed}
+.badge.cancelled{color:var(--red);background:var(--redbg)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border:1px solid var(--line);background:white;border-radius:9px;font-size:10px;font-weight:800;color:#536157;transition:.15s}
+.btn:hover{border-color:#9cc6a8;color:var(--green)}
+.btn-primary{background:var(--green);color:white;border-color:var(--green)}
+.btn-primary:hover{background:var(--forest);color:white;border-color:var(--forest)}
+.btn-danger{color:var(--red)}
+.btn-small{padding:6px 8px;font-size:9px}
+.activity-list{padding:3px 19px 9px}
+.activity{display:flex;align-items:flex-start;gap:10px;padding:13px 0;border-bottom:1px solid #eff2ef}
+.activity:last-child{border-bottom:0}
+.activity-icon{height:32px;width:32px;border-radius:10px;display:grid;place-items:center;flex-shrink:0;font-size:15px}
+.activity-copy{font-size:11px;line-height:1.6}
+.activity-copy strong{font-weight:800}
+.activity-time{font-size:9px;color:#98a199;margin-top:4px}
+.stock-list{padding:0 19px 9px}
+.stock-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #eff2ef}
+.stock-row:last-child{border-bottom:0}
+.product-icon{height:39px;width:39px;border-radius:11px;background:#f1f6f0;display:grid;place-items:center;font-size:21px;flex-shrink:0}
+.stock-info{flex:1;min-width:0}
+.stock-name{font-size:11px;font-weight:800}
+.stock-cat{font-size:9px;color:var(--muted);margin-top:4px}
+.stock-qty{text-align:right;font-size:11px;font-weight:800}
+.stock-qty.low{color:var(--red)}
+.stock-meter{height:4px;border-radius:5px;background:#edf1ed;overflow:hidden;margin-top:6px}
+.stock-meter span{display:block;height:100%;background:#50a66b}
+.stock-meter span.low{background:#e07d67}
+.task-list{padding:4px 19px 9px}
+.task-item{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid #eff2ef}
+.task-item:last-child{border:0}
+.task-item input{accent-color:var(--green);width:15px;height:15px;margin-top:2px}
+.task-copy{flex:1;font-size:11px;line-height:1.5}
+.task-copy.done{text-decoration:line-through;color:#98a199}
+.task-meta{font-size:9px;color:var(--muted);margin-top:4px}
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:17px}
+.quick{border:1px solid var(--line);background:#fff;border-radius:12px;padding:14px;text-align:left;transition:.18s}
+.quick:hover{border-color:#9ac7a7;background:#f7fbf7;transform:translateY(-2px)}
+.quick-icon{font-size:21px;margin-bottom:10px}
+.quick-title{font-size:11px;font-weight:800}
+.quick-sub{font-size:9px;color:var(--muted);line-height:1.5;margin-top:5px}
+.page-intro{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin-bottom:20px}
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:1.6px;color:var(--green);margin-bottom:8px}
+.page-intro h1{font:800 27px Manrope,sans-serif;letter-spacing:-1px;margin:0 0 7px}
+.page-intro p{font-size:11px;color:var(--muted);margin:0;line-height:1.6}
+.mini-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:17px}
+.mini-stat{background:white;border:1px solid var(--line);border-radius:13px;padding:15px 17px}
+.mini-stat span{font-size:10px;color:var(--muted)}
+.mini-stat strong{display:block;font:800 22px Manrope,sans-serif;margin-top:6px}
+.toolbar{display:flex;align-items:center;gap:9px;padding:15px 17px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.field{border:1px solid var(--line);background:white;border-radius:9px;padding:10px 11px;font-size:11px;color:#435247;min-width:0}
+.field:focus{border-color:#87bb98;outline:none}
+.toolbar .search-field{flex:1;min-width:160px}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:720px;text-align:left}
+th{padding:13px 16px;background:#f9fbf8;color:#8a958c;font-size:9px;text-transform:uppercase;letter-spacing:1px;font-weight:800;white-space:nowrap}
+td{padding:14px 16px;border-top:1px solid #eef2ee;font-size:11px;vertical-align:middle}
+tbody tr:hover{background:#fbfdfb}
+.t-strong{font-weight:800}
+.t-muted{font-size:9px;color:var(--muted);margin-top:4px}
+.table-actions{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.inventory-qty{display:flex;align-items:center;gap:7px}
+.qty-btn{width:26px;height:26px;border:1px solid var(--line);background:white;border-radius:7px;font-weight:800}
+.qty-btn:hover{background:var(--mint);color:var(--green)}
+.qty-number{min-width:17px;text-align:center;font-weight:800}
+.empty{text-align:center;padding:40px 18px;color:var(--muted);font-size:11px;line-height:1.7}
+.empty-icon{font-size:30px;margin-bottom:8px}
+.empty strong{display:block;color:var(--ink);font-size:12px;margin-bottom:4px}
+.task-columns{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.task-row{display:flex;align-items:flex-start;gap:11px;padding:15px 18px;border-bottom:1px solid #eef2ee}
+.task-row:last-child{border-bottom:0}
+.task-check{width:16px;height:16px;accent-color:var(--green);margin-top:2px;flex-shrink:0}
+.task-main{flex:1;min-width:0}
+.task-main strong{display:block;font-size:11px}
+.task-main p{font-size:10px;line-height:1.5;color:var(--muted);margin:5px 0 8px}
+.task-row.completed .task-main strong{text-decoration:line-through;color:#98a199}
+.team-row{display:flex;align-items:center;gap:12px;padding:17px 20px;border-bottom:1px solid #eef2ee}
+.team-row:last-child{border-bottom:0}
+.team-avatar{width:42px;height:42px;border-radius:13px;background:#e6f3e9;color:var(--green);display:grid;place-items:center;font-weight:800;flex-shrink:0}
+.team-info{flex:1;min-width:0}
+.team-info strong{font-size:11px}
+.team-info p{font-size:10px;color:var(--muted);margin:5px 0 0}
+.team-role{text-align:right;font-size:10px;color:var(--muted)}
+.team-role strong{display:block;color:var(--green);margin-bottom:4px}
+.report-bars{padding:20px}
+.report-row{margin-bottom:20px}
+.report-row:last-child{margin-bottom:0}
+.report-label{display:flex;justify-content:space-between;gap:10px;font-size:11px;margin-bottom:8px}
+.report-label span:last-child{color:var(--muted)}
+.bar-track{height:8px;border-radius:8px;background:#edf1ed;overflow:hidden}
+.bar-fill{height:100%;border-radius:8px}
+.notice{border:1px solid #e8e9d5;background:#fffdf0;border-radius:12px;padding:14px 16px;color:#766a38;font-size:10px;line-height:1.7;margin-top:16px}
+.footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#98a198;font-size:9px;padding-top:25px}
+.footer strong{color:var(--green)}
+.modal-backdrop{display:none;position:fixed;inset:0;background:#0b2117a6;z-index:100;align-items:center;justify-content:center;padding:18px}
+.modal-backdrop.open{display:flex}
+.modal{width:min(510px,100%);max-height:90vh;overflow:auto;border-radius:18px;background:white;box-shadow:0 25px 90px #0003}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:19px 21px;border-bottom:1px solid var(--line)}
+.modal-head h2{font:800 15px Manrope,sans-serif;margin:0}
+.modal-close{border:0;background:#f1f4f0;border-radius:9px;width:31px;height:31px;font-size:19px}
+.modal-body{padding:21px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.form-field{display:flex;flex-direction:column;gap:7px}
+.form-field.full{grid-column:1/-1}
+.form-field label{font-size:10px;font-weight:800;color:#526056}
+.form-field input,.form-field select,.form-field textarea{border:1px solid var(--line);border-radius:9px;padding:11px;width:100%;background:white;font-size:11px}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:15px 21px;border-top:1px solid var(--line)}
+.toast{position:fixed;bottom:24px;right:24px;z-index:150;max-width:calc(100vw - 40px);background:var(--forest);color:white;border-radius:11px;padding:13px 16px;font-size:11px;font-weight:700;box-shadow:0 10px 30px #0002;opacity:0;transform:translateY(12px);pointer-events:none;transition:.2s}
+.toast.show{opacity:1;transform:translateY(0)}
+.mobile-nav{display:none}
+@media(max-width:1200px){
+ .sidebar{width:225px}.main{margin-left:225px}.content{padding:24px}
+ .topbar{padding:0 24px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .layout-two,.layout-equal{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+ .sidebar{transform:translateX(-100%);width:255px}.sidebar.open{transform:translateX(0);box-shadow:15px 0 40px #0003}
+ .main{margin-left:0;padding-bottom:67px}
+ .topbar{height:66px;padding:0 13px;gap:8px}
+ .menu-btn{display:grid;flex-shrink:0}
+ .top-title{font-size:14px}
+ .breadcrumb{display:none}
+ .search input{width:37px;height:37px;padding:0;color:transparent;cursor:pointer}
+ .search input:focus{position:absolute;right:0;top:0;width:min(245px,66vw);padding:10px 10px 10px 33px;color:var(--ink);z-index:4;background:white}
+ .search-icon{top:9px;pointer-events:none}
+ .top-right{gap:6px}
+ .profile{padding-left:6px;border:0}.profile-copy{display:none}.avatar{width:34px;height:34px}
+ .content{padding:18px 13px 25px}
+ .welcome{padding:21px 18px;align-items:flex-start}.welcome-side{min-width:auto}.date-label{font-size:9px}.date-value{font-size:11px}.store-open{font-size:9px;padding:8px}
+ .welcome p{max-width:270px;font-size:11px}
+ .stats{gap:9px}.stat{padding:14px}.stat-value{font-size:25px;margin:12px 0 5px}.stat-icon{width:32px;height:32px;font-size:16px}
+ .stat-label{font-size:10px}.stat-foot{font-size:9px}
+ .section-heading{margin-top:21px}
+ .pipeline{padding:12px;gap:6px}.pipeline-step{padding:9px 7px}.pipeline-step span{font-size:8px}.pipeline-step strong{font-size:18px}
+ .panel-head{padding:16px}
+ .order-list,.stock-list,.activity-list,.task-list{padding-left:14px;padding-right:14px}
+ .order-row{gap:7px}.order-id,.order-customer{font-size:10px}.order-total{font-size:11px}
+ .page-intro{align-items:flex-start;flex-direction:column}.page-intro h1{font-size:24px}
+ .mini-stats{gap:8px}.mini-stat{padding:12px}.mini-stat span{font-size:9px}.mini-stat strong{font-size:19px}
+ .task-columns{grid-template-columns:1fr}
+ .mobile-nav{position:fixed;left:0;right:0;bottom:0;height:62px;display:flex;align-items:center;justify-content:space-around;background:#fff;border-top:1px solid var(--line);z-index:40;padding-bottom:env(safe-area-inset-bottom)}
+ .mobile-nav button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:4px;color:#839087;font-size:9px;font-weight:800;padding:6px}
+ .mobile-nav button span{font-size:18px}.mobile-nav button.active{color:var(--green)}
+ .footer{padding-top:20px}
+}
+@media(max-width:400px){
+ .welcome-side{display:none}.welcome h1{font-size:22px}
+ .stats{grid-template-columns:1fr 1fr}
+ .form-grid{grid-template-columns:1fr}.form-field.full{grid-column:auto}
+ .toolbar{padding:12px}.toolbar .field{max-width:100%}
+}
+</style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-icon">🌿</div>
+    <div><div class="brand-title">GREEN MART <span style="color:#a8e4b7">V4</span></div><div class="brand-sub">OPERATIONS CENTRE</div></div>
+  </div>
+  <div class="nav-caption">WORKSPACE</div>
+  <nav class="nav">
+    <button class="active" data-page="dashboard"><span class="nav-icon">▦</span>Overview</button>
+    <button data-page="orders"><span class="nav-icon">🛍</span>Order management<span class="nav-badge" id="navOrders">0</span></button>
+    <button data-page="inventory"><span class="nav-icon">📦</span>Inventory</button>
+    <button data-page="tasks"><span class="nav-icon">☑</span>Tasks & checklist</button>
+    <button data-page="team"><span class="nav-icon">♙</span>Team directory</button>
+  </nav>
+  <div class="nav-caption" style="margin-top:15px">INSIGHTS</div>
+  <nav class="nav">
+    <button data-page="reports"><span class="nav-icon">▤</span>Reports & summary</button>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="connection-card">
+      <div class="connection-title"><span class="connection-dot"></span>Demo environment</div>
+      <div class="connection-desc">Sample workspace for previewing store operations. Not connected to live customer orders.</div>
+    </div>
+    <div style="font-size:9px;color:#86ad94;padding:17px 8px 0">GREEN MART V4 · STAFF PORTAL</div>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="top-left">
+      <button class="icon-btn menu-btn" id="menuToggle" aria-label="Open navigation">☰</button>
+      <div><div class="breadcrumb">GREEN MART V4 / WORKSPACE</div><div class="top-title" id="topTitle">Operations overview</div></div>
+    </div>
+    <div class="top-right">
+      <div class="search"><span class="search-icon">⌕</span><input id="globalSearch" type="search" placeholder="Search orders, products…"></div>
+      <button class="icon-btn" id="alertsBtn" title="Check alerts" aria-label="Check alerts">♧<span class="alert-dot"></span></button>
+      <div class="profile"><div class="avatar">GM</div><div class="profile-copy"><div class="profile-name">Store Team</div><div class="profile-role">Demo staff account</div></div></div>
+    </div>
+  </header>
+
+  <div class="content">
+    <section class="page active" id="page-dashboard">
+      <div class="welcome">
+        <div class="welcome-copy">
+          <div class="welcome-label">YOUR STORE AT A GLANCE</div>
+          <h1>Let's make today a great one.</h1>
+          <p>Orders, stock and team tasks — everything your store needs, in one place.</p>
+        </div>
+        <div class="welcome-side">
+          <div class="date-label">TODAY'S DATE</div><div class="date-value" id="dateValue">Loading…</div>
+          <div class="store-open"><span></span> Workspace active</div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="stat-top"><span class="stat-label">Total demo orders</span><span class="stat-icon" style="background:#e7f5eb">🛍️</span></div><div class="stat-value" id="statOrders">0</div><div class="stat-foot">Orders in sample dataset</div></div>
+        <div class="stat"><div class="stat-top"><span class="stat-label">Orders to process</span><span class="stat-icon" style="background:#fff4df">◷</span></div><div class="stat-value" id="statOpen">0</div><div class="stat-foot"><strong>Action needed</strong> · Not yet delivered</div></div>
+        <div class="stat"><div class="stat-top"><span class="stat-label">Delivered orders</span><span class="stat-icon" style="background:#edf3ff">✓</span></div><div class="stat-value" id="statDelivered">0</div><div class="stat-foot">Marked delivered in this demo</div></div>
+        <div class="stat"><div class="stat-top"><span class="stat-label">Stock alerts</span><span class="stat-icon" style="background:#ffeded">⚠</span></div><div class="stat-value" id="statLow">0</div><div class="stat-foot">Products at or below minimum</div></div>
+      </div>
+
+      <div class="section-heading"><div><h2>Order operations</h2><p>Follow every order from arrival to completion.</p></div><button class="btn" data-goto="orders">Open order desk ↗</button></div>
+      <div class="panel">
+        <div class="pipeline">
+          <div class="pipeline-step active-step"><span>Pending</span><strong id="pipePending">0</strong></div>
+          <div class="pipeline-step"><span>Preparing</span><strong id="pipePreparing">0</strong></div>
+          <div class="pipeline-step"><span>Packed</span><strong id="pipePacked">0</strong></div>
+          <div class="pipeline-step"><span>Ready to dispatch</span><strong id="pipeReady">0</strong></div>
+        </div>
+        <div class="panel-head"><div><h2 class="panel-title">Latest orders</h2><div class="panel-sub">Sample orders for your staff demo</div></div><button class="link-btn" data-goto="orders">View all →</button></div>
+        <div class="order-list" id="recentOrders"></div>
+      </div>
+
+      <div class="layout-two">
+        <div class="panel">
+          <div class="panel-head"><div><h2 class="panel-title">Inventory watch</h2><div class="panel-sub">Products needing attention</div></div><button class="link-btn" data-goto="inventory">Manage stock →</button></div>
+          <div class="stock-list" id="stockWatch"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h2 class="panel-title">Priority checklist</h2><div class="panel-sub">Keep daily operations on track</div></div><button class="link-btn" data-goto="tasks">All tasks →</button></div>
+          <div class="task-list" id="dashboardTasks"></div>
+        </div>
+      </div>
+
+      <div class="layout-two">
+        <div class="panel">
+          <div class="panel-head"><div><h2 class="panel-title">Recent activity</h2><div class="panel-sub">Latest changes in this browser session</div></div></div>
+          <div class="activity-list" id="activityList"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h2 class="panel-title">Quick actions</h2><div class="panel-sub">Get straight to the task</div></div></div>
+          <div class="quick-grid">
+            <button class="quick" data-goto="orders"><div class="quick-icon">🛍️</div><div class="quick-title">Process orders</div><div class="quick-sub">Review and update order status.</div></button>
+            <button class="quick" data-goto="inventory"><div class="quick-icon">📦</div><div class="quick-title">Update stock</div><div class="quick-sub">Adjust quantities and product details.</div></button>
+            <button class="quick" data-goto="tasks"><div class="quick-icon">☑️</div><div class="quick-title">Staff checklist</div><div class="quick-sub">Track daily duties and completion.</div></button>
+            <button class="quick" data-goto="reports"><div class="quick-icon">📊</div><div class="quick-title">View summary</div><div class="quick-sub">Review sample order and stock data.</div></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-orders">
+      <div class="page-intro"><div><div class="eyebrow">ORDER FULFILMENT</div><h1>Order management</h1><p>Review customer orders and move them through the fulfilment process.</p></div><button class="btn" id="exportOrders">↓ Export CSV</button></div>
+      <div class="mini-stats" id="orderMiniStats"></div>
+      <div class="panel">
+        <div class="toolbar"><input class="field search-field" id="orderSearch" placeholder="Search by order ID or customer…"><select class="field" id="orderFilter"><option value="all">All statuses</option><option>Pending</option><option>Preparing</option><option>Packed</option><option>Ready for delivery</option><option>Delivered</option><option>Cancelled</option></select></div>
+        <div class="table-wrap"><table><thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead><tbody id="ordersBody"></tbody></table></div>
+      </div>
+      <div class="notice">Demo only: customer names, contact details, items and prices are illustrative. Status changes here are saved only in this browser and do not notify customers or delivery partners.</div>
+    </section>
+
+    <section class="page" id="page-inventory">
+      <div class="page-intro"><div><div class="eyebrow">STOCK CONTROL</div><h1>Inventory management</h1><p>Monitor availability, update quantities and keep product information organised.</p></div><button class="btn btn-primary" id="addProductBtn">＋ Add product</button></div>
+      <div class="mini-stats" id="inventoryStats"></div>
+      <div class="panel">
+        <div class="toolbar"><input class="field search-field" id="inventorySearch" placeholder="Search product or category…"><select class="field" id="inventoryFilter"><option value="all">All products</option><option value="low">Low stock</option><option value="out">Out of stock</option><option value="available">Healthy stock</option></select></div>
+        <div class="table-wrap"><table><thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Quantity</th><th>Stock status</th><th>Manage</th></tr></thead><tbody id="inventoryBody"></tbody></table></div>
+      </div>
+      <div class="notice">Inventory is local demo data. Stock changes do not sync to checkout or other employees until a shared database is connected.</div>
+    </section>
+
+    <section class="page" id="page-tasks">
+      <div class="page-intro"><div><div class="eyebrow">DAILY STORE ROUTINE</div><h1>Tasks & checklist</h1><p>Create tasks, track completion and keep your daily store routine organised.</p></div><button class="btn btn-primary" id="addTaskBtn">＋ Create task</button></div>
+      <div class="mini-stats" id="taskStats"></div>
+      <div class="task-columns">
+        <div class="panel"><div class="panel-head"><div><h2 class="panel-title">To do</h2><div class="panel-sub">Tasks waiting for completion</div></div><span class="badge pending" id="todoBadge">0 tasks</span></div><div id="todoTasks"></div></div>
+        <div class="panel"><div class="panel-head"><div><h2 class="panel-title">Completed</h2><div class="panel-sub">Tasks marked complete</div></div><span class="badge ready" id="doneBadge">0 tasks</span></div><div id="doneTasks"></div></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-team">
+      <div class="page-intro"><div><div class="eyebrow">PEOPLE & RESPONSIBILITIES</div><h1>Team directory</h1><p>Preview the roles involved in keeping supermarket operations running.</p></div></div>
+      <div class="mini-stats">
+        <div class="mini-stat"><span>Sample team roles</span><strong>4</strong></div>
+        <div class="mini-stat"><span>Departments</span><strong>4</strong></div>
+        <div class="mini-stat"><span>Account mode</span><strong style="font-size:15px;color:var(--orange)">Demo</strong></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div><h2 class="panel-title">Store team</h2><div class="panel-sub">Illustrative roles, not real employee records</div></div></div>
+        <div class="team-row"><div class="team-avatar">SM</div><div class="team-info"><strong>Store Manager</strong><p>Oversees daily store operations, team priorities and approvals.</p></div><div class="team-role"><strong>Management</strong>Role example</div></div>
+        <div class="team-row"><div class="team-avatar" style="background:#edf3ff;color:#4776c7">OF</div><div class="team-info"><strong>Order Fulfilment</strong><p>Collects products, verifies quantities and packs orders.</p></div><div class="team-role"><strong>Operations</strong>Role example</div></div>
+        <div class="team-row"><div class="team-avatar" style="background:#fff4df;color:#b8781d">IC</div><div class="team-info"><strong>Inventory Coordinator</strong><p>Maintains stock records and identifies replenishment needs.</p></div><div class="team-role"><strong>Inventory</strong>Role example</div></div>
+        <div class="team-row"><div class="team-avatar" style="background:#f2edfb;color:#8661ba">DC</div><div class="team-info"><strong>Delivery Coordinator</strong><p>Prepares completed orders for handover to delivery partners.</p></div><div class="team-role"><strong>Dispatch</strong>Role example</div></div>
+      </div>
+      <div class="notice">Production requirement: employee accounts, access permissions, attendance and audit history are not included in this demo. Add secure individual logins before real staff use.</div>
+    </section>
+
+    <section class="page" id="page-reports">
+      <div class="page-intro"><div><div class="eyebrow">PERFORMANCE OVERVIEW</div><h1>Reports & summary</h1><p>A live summary of the sample data currently saved in this browser.</p></div><button class="btn" id="exportReport">↓ Download CSV</button></div>
+      <div class="stats">
+        <div class="stat"><div class="stat-label">Demo orders</div><div class="stat-value" id="reportOrders">0</div><div class="stat-foot">All sample order records</div></div>
+        <div class="stat"><div class="stat-label">Delivered order value</div><div class="stat-value" id="reportRevenue">₹0</div><div class="stat-foot">Value of delivered demo orders</div></div>
+        <div class="stat"><div class="stat-label">Inventory units</div><div class="stat-value" id="reportStock">0</div><div class="stat-foot">Across sample products</div></div>
+        <div class="stat"><div class="stat-label">Outstanding tasks</div><div class="stat-value" id="reportTasks">0</div><div class="stat-foot">Not yet marked complete</div></div>
+      </div>
+      <div class="layout-two">
+        <div class="panel"><div class="panel-head"><div><h2 class="panel-title">Order status breakdown</h2><div class="panel-sub">Current distribution by status</div></div></div><div class="report-bars" id="reportBreakdown"></div></div>
+        <div class="panel"><div class="panel-head"><div><h2 class="panel-title">Inventory health</h2><div class="panel-sub">Products grouped by stock condition</div></div></div><div class="report-bars" id="inventoryBreakdown"></div></div>
+      </div>
+      <div class="notice">This is an operational demo summary, not a verified sales, accounting, tax or financial report. Values come from the example data and should not be used for business decisions.</div>
+    </section>
+
+    <footer class="footer"><span>© <span id="year"></span> <strong>Green Mart V4</strong> · Operations Centre</span><span>Staff portal concept · Demo environment</span></footer>
+  </div>
+</main>
+
+<nav class="mobile-nav">
+  <button class="active" data-page="dashboard"><span>▦</span>Home</button>
+  <button data-page="orders"><span>🛍</span>Orders</button>
+  <button data-page="inventory"><span>📦</span>Stock</button>
+  <button data-page="tasks"><span>☑</span>Tasks</button>
+  <button data-page="team"><span>♙</span>Team</button>
+</nav>
+
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <div class="modal-head"><h2 id="modalTitle">Details</h2><button class="modal-close" id="modalClose" aria-label="Close">×</button></div>
+    <form id="modalForm"><div class="modal-body" id="modalBody"></div><div class="modal-foot"><button type="button" class="btn" id="modalCancel">Cancel</button><button type="submit" class="btn btn-primary" id="modalSubmit">Save</button></div></form>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const money=n=>"₹"+Number(n).toLocaleString("en-IN",{maximumFractionDigits:2});
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const STATUSES=["Pending","Preparing","Packed","Ready for delivery","Delivered","Cancelled"];
+const STATUS_CLASS={"Pending":"pending","Preparing":"preparing","Packed":"packed","Ready for delivery":"ready","Delivered":"delivered","Cancelled":"cancelled"};
+const NEXT={"Pending":"Preparing","Preparing":"Packed","Packed":"Ready for delivery","Ready for delivery":"Delivered"};
+const NEXT_LABEL={"Pending":"Start preparing","Preparing":"Mark packed","Packed":"Ready to dispatch","Ready for delivery":"Mark delivered"};
+const defaultOrders=[
+{id:"GM-1048",customer:"Ananya Sharma",phone:"Sample contact",address:"Demo delivery address",items:[{name:"Fresh Tomatoes",qty:2},{name:"Whole Milk",qty:1},{name:"Bananas",qty:1}],total:248,status:"Pending",time:"09:42 AM"},
+{id:"GM-1047",customer:"Rahul Kumar",phone:"Sample contact",address:"Demo delivery address",items:[{name:"Basmati Rice",qty:1},{name:"Cooking Oil",qty:1}],total:685,status:"Preparing",time:"09:25 AM"},
+{id:"GM-1046",customer:"Priya Reddy",phone:"Sample contact",address:"Demo delivery address",items:[{name:"Apples",qty:2},{name:"Bread",qty:1},{name:"Eggs",qty:1}],total:320,status:"Packed",time:"09:10 AM"},
+{id:"GM-1045",customer:"Arjun Mehta",phone:"Sample contact",address:"Demo delivery address",items:[{name:"Potatoes",qty:3},{name:"Onions",qty:2}],total:175,status:"Ready for delivery",time:"08:55 AM"},
+{id:"GM-1044",customer:"Meera Nair",phone:"Sample contact",address:"Demo delivery address",items:[{name:"Whole Milk",qty:2},{name:"Bread",qty:1}],total:146,status:"Delivered",time:"08:30 AM"},
+{id:"GM-1043",customer:"Kiran Rao",phone:"Sample contact",address:"Demo delivery address",items:[{name:"Fresh Tomatoes",qty:1},{name:"Apples",qty:1}],total:130,status:"Delivered",time:"08:05 AM"},
+{id:"GM-1042",customer:"Divya Patel",phone:"Sample contact",address:"Demo delivery address",items:[{name:"Eggs",qty:1},{name:"Bananas",qty:2}],total:168,status:"Delivered",time:"07:45 AM"}
+];
+const defaultProducts=[
+{id:1,name:"Fresh Tomatoes",category:"Vegetables",price:32,stock:8,min:10,emoji:"🍅"},
+{id:2,name:"Bananas",category:"Fruits",price:48,stock:24,min:10,emoji:"🍌"},
+{id:3,name:"Whole Milk",category:"Dairy",price:30,stock:18,min:8,emoji:"🥛"},
+{id:4,name:"Basmati Rice",category:"Staples",price:125,stock:32,min:10,emoji:"🍚"},
+{id:5,name:"Apples",category:"Fruits",price:140,stock:6,min:10,emoji:"🍎"},
+{id:6,name:"Bread",category:"Bakery",price:40,stock:14,min:5,emoji:"🍞"},
+{id:7,name:"Cooking Oil",category:"Staples",price:165,stock:4,min:8,emoji:"🫒"},
+{id:8,name:"Potatoes",category:"Vegetables",price:28,stock:22,min:10,emoji:"🥔"},
+{id:9,name:"Onions",category:"Vegetables",price:35,stock:0,min:10,emoji:"🧅"},
+{id:10,name:"Eggs",category:"Dairy",price:72,stock:12,min:6,emoji:"🥚"},
+{id:11,name:"Orange Juice",category:"Beverages",price:85,stock:15,min:5,emoji:"🧃"}
+];
+const defaultTasks=[
+{id:1,title:"Inspect fresh produce",detail:"Remove damaged fruit and vegetables.",category:"Fresh produce",done:false},
+{id:2,title:"Restock the dairy refrigerator",detail:"Check dates and rotate older stock forward.",category:"Inventory",done:false},
+{id:3,title:"Pack pending customer orders",detail:"Verify each product and quantity before packing.",category:"Orders",done:false},
+{id:4,title:"Organise the packing station",detail:"Keep bags and packing supplies ready.",category:"Store upkeep",done:false},
+{id:5,title:"Review low-stock products",detail:"Identify items that may need replenishment.",category:"Inventory",done:true},
+{id:6,title:"Check checkout supplies",detail:"Ensure receipt paper and bags are available.",category:"Store upkeep",done:false}
+];
+function clone(x){return JSON.parse(JSON.stringify(x))}
+function load(key,fallback){
+ try{const s=localStorage.getItem("gmv4_staff_"+key);return s?JSON.parse(s):clone(fallback)}
+ catch(e){return clone(fallback)}
+}
+let orders=load("orders",defaultOrders),products=load("products",defaultProducts),tasks=load("tasks",defaultTasks);
+let activity=load("activity",[{icon:"🌿",text:"Staff workspace opened",time:"Demo environment"}]);
+let modalMode=null,toastTimer=null;
+function save(){
+ try{
+  localStorage.setItem("gmv4_staff_orders",JSON.stringify(orders));
+  localStorage.setItem("gmv4_staff_products",JSON.stringify(products));
+  localStorage.setItem("gmv4_staff_tasks",JSON.stringify(tasks));
+  localStorage.setItem("gmv4_staff_activity",JSON.stringify(activity.slice(0,20)));
+ }catch(e){notify("Browser storage is unavailable. Changes may not persist.");}
+}
+function log(icon,text){
+ activity.unshift({icon,text,time:new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})});
+ activity=activity.slice(0,20);
+}
+function notify(message){
+ const t=$("toast");t.textContent=message;t.classList.add("show");
+ clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),2700);
+}
+function statusBadge(s){return `<span class="badge ${STATUS_CLASS[s]||""}">${esc(s)}</span>`}
+function nextStatus(s){return NEXT[s]||s}
+function setPage(page){
+ const titles={dashboard:"Operations overview",orders:"Order management",inventory:"Inventory management",tasks:"Tasks & checklist",team:"Team directory",reports:"Reports & summary"};
+ if(!titles[page])return;
+ document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id==="page-"+page));
+ document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+ $("topTitle").textContent=titles[page];$("sidebar").classList.remove("open");
+ render();window.scrollTo({top:0,behavior:"smooth"});
+}
+function itemCount(o){return o.items.reduce((n,i)=>n+Number(i.qty||0),0)}
+function actions(o){
+ const advance=NEXT[o.status];
+ return `${advance?`<button class="btn btn-primary btn-small" data-next="${esc(o.id)}">${NEXT_LABEL[o.status]}</button>`:""}<button class="btn btn-small" data-detail="${esc(o.id)}">Details</button>`;
+}
+function renderStats(){
+ const open=orders.filter(o=>["Pending","Preparing","Packed","Ready for delivery"].includes(o.status)).length;
+ const low=products.filter(p=>p.stock<=p.min).length;
+ $("statOrders").textContent=orders.length;$("statOpen").textContent=open;
+ $("statDelivered").textContent=orders.filter(o=>o.status==="Delivered").length;
+ $("statLow").textContent=low;$("navOrders").textContent=open;
+ $("pipePending").textContent=orders.filter(o=>o.status==="Pending").length;
+ $("pipePreparing").textContent=orders.filter(o=>o.status==="Preparing").length;
+ $("pipePacked").textContent=orders.filter(o=>o.status==="Packed").length;
+ $("pipeReady").textContent=orders.filter(o=>o.status==="Ready for delivery").length;
+}
+function renderRecent(){
+ const list=orders.slice(0,4);
+ $("recentOrders").innerHTML=list.length?list.map(o=>`
+ <div class="order-row"><div class="order-main"><div class="order-id">${esc(o.id)}</div><div class="order-customer">${esc(o.customer)} · ${esc(o.time)}</div><div class="order-meta">${statusBadge(o.status)}<span style="font-size:9px;color:var(--muted)">${itemCount(o)} items</span></div></div>
+ <div class="order-right"><div class="order-total">${money(o.total)}</div><div class="order-actions">${actions(o)}</div></div></div>`).join(""):`<div class="empty"><div class="empty-icon">🛍️</div><strong>No orders yet</strong>Orders will appear here when added to this demo.</div>`;
+}
+function renderStockWatch(){
+ const list=products.filter(p=>p.stock<=p.min).sort((a,b)=>a.stock-b.stock).slice(0,5);
+ $("stockWatch").innerHTML=list.length?list.map(p=>`
+ <div class="stock-row"><div class="product-icon">${esc(p.emoji)}</div><div class="stock-info"><div class="stock-name">${esc(p.name)}</div><div class="stock-cat">${esc(p.category)} · Minimum ${p.min}</div><div class="stock-meter"><span class="low" style="width:${Math.min(100,p.min?100*p.stock/p.min:100)}%"></span></div></div><div class="stock-qty low">${p.stock} left</div></div>`).join(""):`<div class="empty"><div class="empty-icon">🌱</div><strong>Stock is looking healthy</strong>No products at or below minimum stock.</div>`;
+}
+function renderDashTasks(){
+ const list=tasks.filter(t=>!t.done).slice(0,4);
+ $("dashboardTasks").innerHTML=list.length?list.map(t=>`<label class="task-item"><input type="checkbox" data-task-check="${t.id}"><span class="task-copy">${esc(t.title)}<div class="task-meta">${esc(t.category)}</div></span></label>`).join(""):`<div class="empty"><div class="empty-icon">🎉</div><strong>All caught up</strong>No outstanding tasks.</div>`;
+}
+function renderActivity(){
+ $("activityList").innerHTML=activity.length?activity.slice(0,5).map(a=>`<div class="activity"><div class="activity-icon" style="background:#edf5ee">${esc(a.icon)}</div><div class="activity-copy">${esc(a.text)}<div class="activity-time">${esc(a.time)}</div></div></div>`).join(""):`<div class="empty">No activity yet.</div>`;
+}
+function renderOrders(){
+ const q=($("orderSearch")?.value||"").toLowerCase(),filter=$("orderFilter")?.value||"all";
+ const list=orders.filter(o=>(filter==="all"||o.status===filter)&&(o.id+" "+o.customer).toLowerCase().includes(q));
+ $("orderMiniStats").innerHTML=[["Total orders",orders.length],["Open orders",orders.filter(o=>NEXT[o.status]).length],["Delivered",orders.filter(o=>o.status==="Delivered").length]].map(x=>`<div class="mini-stat"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join("");
+ $("ordersBody").innerHTML=list.length?list.map(o=>`<tr>
+ <td><div class="t-strong">${esc(o.id)}</div><div class="t-muted">${esc(o.time)}</div></td>
+ <td><div class="t-strong">${esc(o.customer)}</div><div class="t-muted">${esc(o.phone)}</div></td>
+ <td>${itemCount(o)} items<div class="t-muted">${esc(o.items.map(i=>i.name+" × "+i.qty).join(", "))}</div></td>
+ <td><strong>${money(o.total)}</strong></td><td>${statusBadge(o.status)}</td><td><div class="table-actions">${actions(o)}${o.status!=="Delivered"&&o.status!=="Cancelled"?`<button class="btn btn-small btn-danger" data-cancel="${esc(o.id)}">Cancel</button>`:""}</div></td>
+ </tr>`).join(""):`<tr><td colspan="6"><div class="empty"><div class="empty-icon">🔎</div><strong>No matching orders</strong>Try another search or filter.</div></td></tr>`;
+}
+function stockStatus(p){return p.stock===0?"Out of stock":p.stock<=p.min?"Low stock":"In stock"}
+function stockClass(p){return p.stock===0?"cancelled":p.stock<=p.min?"pending":"ready"}
+function renderInventory(){
+ const q=($("inventorySearch")?.value||"").toLowerCase(),filter=$("inventoryFilter")?.value||"all";
+ const list=products.filter(p=>{
+  const match=(p.name+" "+p.category).toLowerCase().includes(q);
+  const f=filter==="all"||(filter==="low"&&p.stock>0&&p.stock<=p.min)||(filter==="out"&&p.stock===0)||(filter==="available"&&p.stock>p.min);
+  return match&&f;
+ });
+ $("inventoryStats").innerHTML=[["Products",products.length],["Low stock",products.filter(p=>p.stock>0&&p.stock<=p.min).length],["Out of stock",products.filter(p=>p.stock===0).length]].map(x=>`<div class="mini-stat"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join("");
+ $("inventoryBody").innerHTML=list.length?list.map(p=>`<tr>
+ <td><div style="display:flex;align-items:center;gap:9px"><div class="product-icon" style="height:35px;width:35px;font-size:19px">${esc(p.emoji)}</div><div><div class="t-strong">${esc(p.name)}</div><div class="t-muted">SKU-${String(p.id).padStart(4,"0")}</div></div></div></td>
+ <td>${esc(p.category)}</td><td><strong>${money(p.price)}</strong></td>
+ <td><div class="inventory-qty"><button class="qty-btn" data-stock="${p.id}" data-delta="-1" aria-label="Decrease stock">−</button><span class="qty-number">${p.stock}</span><button class="qty-btn" data-stock="${p.id}" data-delta="1" aria-label="Increase stock">+</button></div><div class="t-muted">Minimum ${p.min}</div></td>
+ <td>${statusBadge(stockStatus(p))}</td><td><div class="table-actions"><button class="btn btn-small" data-edit="${p.id}">Edit</button><button class="btn btn-small btn-danger" data-delete="${p.id}">Delete</button></div></td>
+ </tr>`).join(""):`<tr><td colspan="6"><div class="empty"><div class="empty-icon">📦</div><strong>No matching products</strong>Try a different filter or add a product.</div></td></tr>`;
+}
+function renderTasks(){
+ const todo=tasks.filter(t=>!t.done),done=tasks.filter(t=>t.done);
+ $("taskStats").innerHTML=[["All tasks",tasks.length],["Remaining",todo.length],["Completed",done.length]].map(x=>`<div class="mini-stat"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join("");
+ $("todoBadge").textContent=todo.length+" tasks";$("doneBadge").textContent=done.length+" tasks";
+ const makeRows=list=>list.length?list.map(t=>`<div class="task-row ${t.done?"completed":""}"><input class="task-check" type="checkbox" data-task-check="${t.id}" ${t.done?"checked":""}><div class="task-main"><strong>${esc(t.title)}</strong><p>${esc(t.detail)}</p><span class="badge">${esc(t.category)}</span></div><button class="btn btn-small btn-danger" data-task-delete="${t.id}" aria-label="Delete task">×</button></div>`).join(""):`<div class="empty"><div class="empty-icon">${list===todo?"🎉":"📝"}</div><strong>${list===todo?"Nothing left to do":"No completed tasks yet"}</strong></div>`;
+ $("todoTasks").innerHTML=makeRows(todo);$("doneTasks").innerHTML=makeRows(done);
+}
+function renderReports(){
+ const delivered=orders.filter(o=>o.status==="Delivered");
+ $("reportOrders").textContent=orders.length;
+ $("reportRevenue").textContent=money(delivered.reduce((n,o)=>n+o.total,0));
+ $("reportStock").textContent=products.reduce((n,p)=>n+p.stock,0);
+ $("reportTasks").textContent=tasks.filter(t=>!t.done).length;
+ const colors={"Pending":"#d89a38","Preparing":"#5d8ad3","Packed":"#9676c7","Ready for delivery":"#409765","Delivered":"#a0b1a3","Cancelled":"#db7777"};
+ $("reportBreakdown").innerHTML=STATUSES.map(s=>{
+  const count=orders.filter(o=>o.status===s).length,pc=orders.length?count/orders.length*100:0;
+  return `<div class="report-row"><div class="report-label"><span>${esc(s)}</span><span>${count} orders</span></div><div class="bar-track"><div class="bar-fill" style="width:${pc}%;background:${colors[s]}"></div></div></div>`;
+ }).join("");
+ const groups=[{label:"Healthy stock",count:products.filter(p=>p.stock>p.min).length,color:"#409765"},{label:"Low stock",count:products.filter(p=>p.stock>0&&p.stock<=p.min).length,color:"#d89a38"},{label:"Out of stock",count:products.filter(p=>p.stock===0).length,color:"#db7777"}];
+ $("inventoryBreakdown").innerHTML=groups.map(g=>`<div class="report-row"><div class="report-label"><span>${g.label}</span><span>${g.count} products</span></div><div class="bar-track"><div class="bar-fill" style="width:${products.length?g.count/products.length*100:0}%;background:${g.color}"></div></div></div>`).join("");
+}
+function render(){renderStats();renderRecent();renderStockWatch();renderDashTasks();renderActivity();renderOrders();renderInventory();renderTasks();renderReports()}
+function openModal(title,body,mode,submitLabel="Save"){
+ modalMode=mode;$("modalTitle").textContent=title;$("modalBody").innerHTML=body;$("modalSubmit").textContent=submitLabel;$("modalBackdrop").classList.add("open");
+ setTimeout(()=>{const el=$("modalBody").querySelector("input,select,textarea");if(el)el.focus()},25);
+}
+function closeModal(){$("modalBackdrop").classList.remove("open");modalMode=null}
+function formField(label,name,value="",type="text",opts=""){
+ return `<div class="form-field"><label for="f_${name}">${label}</label>${type==="select"?`<select id="f_${name}" name="${name}" required>${opts}</select>`:`<input id="f_${name}" name="${name}" type="${type}" value="${esc(value)}" required ${type==="number"?'min="0" step="any"':""}>`}</div>`;
+}
+const categories=["Vegetables","Fruits","Dairy","Bakery","Staples","Beverages","Household","Other"];
+function categoryOptions(current=""){return categories.map(c=>`<option ${c===current?"selected":""}>${c}</option>`).join("")}
+function addProduct(){
+ openModal("Add inventory product",`<div class="form-grid">
+ <div class="form-field full"><label for="f_name">Product name</label><input id="f_name" name="name" required placeholder="Enter product name"></div>
+ ${formField("Category","category","","select",categoryOptions())}
+ ${formField("Price (₹)","price",0,"number")}
+ ${formField("Stock quantity","stock",0,"number")}
+ ${formField("Minimum stock level","min",5,"number")}
+ ${formField("Emoji icon","emoji","🛒")}
+ </div>`,"addProduct");
+}
+function editProduct(id){
+ const p=products.find(x=>x.id===id);if(!p)return;
+ openModal("Edit product",`<div class="form-grid">
+ <div class="form-field full"><label for="f_name">Product name</label><input id="f_name" name="name" required value="${esc(p.name)}"></div>
+ ${formField("Category","category",p.category,"select",categoryOptions(p.category))}
+ ${formField("Price (₹)","price",p.price,"number")}
+ ${formField("Stock quantity","stock",p.stock,"number")}
+ ${formField("Minimum stock level","min",p.min,"number")}
+ ${formField("Emoji icon","emoji",p.emoji)}
+ </div>`,"editProduct:"+id);
+}
+function addTask(){
+ openModal("Create staff task",`<div class="form-grid">
+ <div class="form-field full"><label for="f_title">Task title</label><input id="f_title" name="title" required placeholder="e.g. Check freezer temperatures"></div>
+ <div class="form-field full"><label for="f_detail">Task description</label><textarea id="f_detail" name="detail" rows="3" placeholder="Add useful instructions"></textarea></div>
+ ${formField("Department","category","","select",["Orders","Inventory","Fresh produce","Store upkeep","Customer service","Other"].map(c=>`<option>${c}</option>`).join(""))}
+ </div>`,"addTask","Create task");
+}
+function orderDetails(id){
+ const o=orders.find(x=>x.id===id);if(!o)return;
+ openModal("Order details · "+o.id,`
+ <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:18px">${statusBadge(o.status)}<strong style="font-size:14px">${money(o.total)}</strong></div>
+ <div style="font-size:11px;line-height:2"><strong>Customer:</strong> ${esc(o.customer)}<br><strong>Contact:</strong> ${esc(o.phone)}<br><strong>Delivery address:</strong> ${esc(o.address)}<br><strong>Order time:</strong> ${esc(o.time)}</div>
+ <h3 style="font-size:12px;margin:20px 0 8px">Items</h3>
+ ${o.items.map(i=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:11px"><span>${esc(i.name)}</span><strong>× ${i.qty}</strong></div>`).join("")}
+ <p style="font-size:10px;color:var(--muted);line-height:1.7;margin:16px 0 0">Sample order details only. This demo does not contact customers or dispatch delivery partners.</p>`,"orderDetail:"+id,"Close");
+}
+$("modalForm").addEventListener("submit",e=>{
+ e.preventDefault();if(!modalMode)return;
+ const d=Object.fromEntries(new FormData(e.currentTarget).entries());
+ if(modalMode==="addProduct"){
+  if(!d.name.trim())return;
+  products.push({id:Math.max(0,...products.map(p=>p.id))+1,name:d.name.trim(),category:d.category,price:Number(d.price),stock:Number(d.stock),min:Number(d.min),emoji:d.emoji.trim()||"🛒"});
+  log("📦","Added product: "+d.name.trim());save();closeModal();render();notify("Product added successfully.");
+ }else if(modalMode.startsWith("editProduct:")){
+  const p=products.find(x=>x.id===Number(modalMode.split(":")[1]));
+  if(p){p.name=d.name.trim();p.category=d.category;p.price=Number(d.price);p.stock=Number(d.stock);p.min=Number(d.min);p.emoji=d.emoji.trim()||"🛒";log("📦","Updated product: "+p.name);}
+  save();closeModal();render();notify("Product updated.");
+ }else if(modalMode==="addTask"){
+  tasks.unshift({id:Math.max(0,...tasks.map(t=>t.id))+1,title:d.title.trim(),detail:d.detail.trim()||"No additional details",category:d.category,done:false});
+  log("☑️","Created task: "+d.title.trim());save();closeModal();render();notify("Staff task created.");
+ }else closeModal();
+});
+function updateOrder(id,status){
+ const o=orders.find(x=>x.id===id);if(!o)return;
+ o.status=status;log("🛍️",o.id+" changed to "+status);save();render();notify(o.id+" updated: "+status+".");
+}
+function csvDownload(filename,rows){
+ const content=rows.map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");
+ const blob=new Blob(["\ufeff"+content],{type:"text/csv;charset=utf-8"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+function exportOrders(){
+ csvDownload("green-mart-demo-orders.csv",[["Order ID","Customer","Items","Total INR","Status","Time"],...orders.map(o=>[o.id,o.customer,o.items.map(i=>i.name+" x"+i.qty).join("; "),o.total,o.status,o.time])]);
+ notify("Order CSV downloaded.");
+}
+function exportReport(){
+ csvDownload("green-mart-demo-report.csv",[["Metric","Value"],["Demo orders",orders.length],["Delivered order value INR",orders.filter(o=>o.status==="Delivered").reduce((n,o)=>n+o.total,0)],["Inventory units",products.reduce((n,p)=>n+p.stock,0)],["Low stock products",products.filter(p=>p.stock<=p.min).length],["Outstanding tasks",tasks.filter(t=>!t.done).length],[],["Product","Category","Price INR","Stock","Minimum stock"],...products.map(p=>[p.name,p.category,p.price,p.stock,p.min])]);
+ notify("Demo report downloaded.");
+}
+document.addEventListener("click",e=>{
+ const nav=e.target.closest("[data-page]");if(nav){setPage(nav.dataset.page);return}
+ const go=e.target.closest("[data-goto]");if(go){setPage(go.dataset.goto);return}
+ const advance=e.target.closest("[data-next]");
+ if(advance){const o=orders.find(x=>x.id===advance.dataset.next);if(o)updateOrder(o.id,nextStatus(o.status));return}
+ const detail=e.target.closest("[data-detail]");
+ if(detail){orderDetails(detail.dataset.detail);return}
+ const cancel=e.target.closest("[data-cancel]");
+ if(cancel){const o=orders.find(x=>x.id===cancel.dataset.cancel);if(o&&confirm("Cancel demo order "+o.id+"?"))updateOrder(o.id,"Cancelled");return}
+ const stock=e.target.closest("[data-stock]");
+ if(stock){
+  const p=products.find(x=>x.id===Number(stock.dataset.stock));if(!p)return;
+  p.stock=Math.max(0,p.stock+Number(stock.dataset.delta));log("📦","Stock updated for "+p.name+": "+p.stock+" units");save();render();notify(p.name+" stock: "+p.stock);return;
+ }
+ const edit=e.target.closest("[data-edit]");if(edit){editProduct(Number(edit.dataset.edit));return}
+ const del=e.target.closest("[data-delete]");
+ if(del){
+  const p=products.find(x=>x.id===Number(del.dataset.delete));if(p&&confirm("Delete "+p.name+" from the demo inventory?")){
+   products=products.filter(x=>x.id!==p.id);log("📦","Removed product: "+p.name);save();render();notify("Product removed.");
+  }return;
+ }
+ const taskDel=e.target.closest("[data-task-delete]");
+ if(taskDel){
+  const t=tasks.find(x=>x.id===Number(taskDel.dataset.taskDelete));
+  if(t&&confirm("Delete task: "+t.title+"?")){tasks=tasks.filter(x=>x.id!==t.id);log("☑️","Deleted task: "+t.title);save();render();notify("Task deleted.");}
+ }
+});
+document.addEventListener("change",e=>{
+ if(e.target.matches("[data-task-check]")){
+  const t=tasks.find(x=>x.id===Number(e.target.dataset.taskCheck));if(!t)return;
+  t.done=e.target.checked;log("☑️",(t.done?"Completed task: ":"Reopened task: ")+t.title);save();render();notify(t.done?"Task completed.":"Task reopened.");
+ }
+});
+$("menuToggle").addEventListener("click",()=>$("sidebar").classList.toggle("open"));
+$("modalClose").addEventListener("click",closeModal);
+$("modalCancel").addEventListener("click",closeModal);
+$("modalBackdrop").addEventListener("click",e=>{if(e.target===$("modalBackdrop"))closeModal()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+$("addProductBtn").addEventListener("click",addProduct);
+$("addTaskBtn").addEventListener("click",addTask);
+$("exportOrders").addEventListener("click",exportOrders);
+$("exportReport").addEventListener("click",exportReport);
+$("orderSearch").addEventListener("input",renderOrders);
+$("orderFilter").addEventListener("change",renderOrders);
+$("inventorySearch").addEventListener("input",renderInventory);
+$("inventoryFilter").addEventListener("change",renderInventory);
+$("globalSearch").addEventListener("keydown",e=>{
+ if(e.key!=="Enter")return;
+ const q=e.target.value.trim();if(!q)return;
+ const foundOrder=orders.some(o=>(o.id+" "+o.customer).toLowerCase().includes(q.toLowerCase()));
+ setPage(foundOrder?"orders":"inventory");
+ if(foundOrder){$("orderSearch").value=q;renderOrders()}else{$("inventorySearch").value=q;renderInventory()}
+});
+$("alertsBtn").addEventListener("click",()=>{
+ const pending=orders.filter(o=>o.status==="Pending").length,low=products.filter(p=>p.stock<=p.min).length;
+ notify(pending+" pending orders · "+low+" products at or below minimum stock.");
+});
+$("year").textContent=new Date().getFullYear();
+$("dateValue").textContent=new Date().toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+render();
+})();
+</script>
+</body>
+</html>
